@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        NEXT_BASE_PATH: ${NEXT_BASE_PATH}
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      MONGO_URI: ${MONGO_URI}
+      TOKEN_SECRET: ${TOKEN_SECRET}
+      NEXT_BASE_PATH: ${NEXT_BASE_PATH}
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH}
