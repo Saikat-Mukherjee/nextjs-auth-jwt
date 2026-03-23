@@ -1,71 +1,122 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { redirect } from 'next/navigation'
 
-export default function LoginPage(){
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
+export default function LoginPage() {
     const router = useRouter();
-    
-    const [user,setuser] = React.useState({
-        password:"",
-        username:"",
-    })
+    const [user, setUser] = useState({ password: "", username: "" });
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const onLogin = async ()=>{
-        console.log(user);
-
-        try {
-            const response = await axios.post('http://localhost:3000/api/users/login',user);
-            console.log(response);
-            console.log("Worked as expected");
-            router.push('/profile');    
-        } catch (error) {
-            console.log("Did not work",error);
+    const onLogin = async () => {
+        setError("");
+        if (!user.username || !user.password) {
+            setError("Username and password are required.");
             return;
         }
-        finally{
-            console.log("Login Success");
-           // redirect(`/profile`) // Navigate to the new post page
+        setLoading(true);
+        try {
+            await axios.post(`${BASE}/api/users/login`, user);
+            router.push("/profile");
+        } catch (err: any) {
+            const msg = err.response?.data?.message || "Login failed. Please try again.";
+            setError(msg);
+        } finally {
+            setLoading(false);
         }
-    }
+    };
 
-    
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") onLogin();
+    };
+
     return (
-        <div className="absolute container flex justify-center">
-            <div className="relative">
-                <h4>Login</h4>
-                <div className="w-100 mx-auto flex flex-col">
-                    <label htmlFor="username">Username</label>
-                    <input type="text" 
-                        id="username" 
-                        className="p-2 border border-gray-200 rounded-lg mb-4 focus:outline-none text-black focus:border-gray-600"
-                        name="username" 
-                        placeholder="Enter your username"
-                        value={user.username}
-                        onChange={(e) => setuser({...user,username:e.target.value})}
-                        ></input>
-                        <label htmlFor="password">Password</label>
-                        <input type="password" 
-                        id="password" 
-                        className="p-2 border border-gray-200 rounded-lg mb-4 focus:outline-none text-black focus:border-gray-600"
-                        name="password" 
-                        placeholder="Enter your password"
-                        value={user.password}
-                        onChange={(e) => setuser({...user,password:e.target.value})}
-                        ></input>
-                        <button 
-                          className="p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-gray-600"
-                          onClick={onLogin}
-                          >Log In
-                          </button>
-                        <p className="text-sm text-gray-500">Don't have an account? 
-                            <Link href="/signup" className="text-blue-600 hover:text-blue-800">Sign up</Link>
-                        </p>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 mb-4 shadow-lg shadow-indigo-500/40">
+                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                        </svg>
+                    </div>
+                    <h1 className="text-2xl font-bold text-white">Welcome back</h1>
+                    <p className="text-slate-400 mt-1 text-sm">Sign in to your account to continue</p>
+                </div>
+
+                {/* Card */}
+                <div className="bg-white/5 border border-white/10 backdrop-blur-sm rounded-2xl p-8 shadow-xl">
+                    {error && (
+                        <div className="mb-5 flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="space-y-5">
+                        <div>
+                            <label htmlFor="username" className="block text-sm font-medium text-slate-300 mb-1.5">
+                                Username
+                            </label>
+                            <input
+                                id="username"
+                                type="text"
+                                placeholder="Enter your username"
+                                value={user.username}
+                                onChange={(e) => setUser({ ...user, username: e.target.value })}
+                                onKeyDown={handleKeyDown}
+                                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-1.5">
+                                Password
+                            </label>
+                            <input
+                                id="password"
+                                type="password"
+                                placeholder="Enter your password"
+                                value={user.password}
+                                onChange={(e) => setUser({ ...user, password: e.target.value })}
+                                onKeyDown={handleKeyDown}
+                                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                            />
+                        </div>
+
+                        <button
+                            onClick={onLogin}
+                            disabled={loading}
+                            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 flex items-center justify-center gap-2 mt-2"
+                        >
+                            {loading ? (
+                                <>
+                                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Sign In"
+                            )}
+                        </button>
+                    </div>
+
+                    <p className="text-center text-sm text-slate-400 mt-6">
+                        Don&apos;t have an account?{" "}
+                        <Link href="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                            Sign up
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>
-    )
+    );
 }

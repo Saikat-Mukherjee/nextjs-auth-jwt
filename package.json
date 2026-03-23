@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "auth-next-app": "file:",
-    "axios": "^1.7.9",
+    "axios": "^1.13.6",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.8.4",
-    "next": "15.0.4",
-    "nodemailer": "^6.9.16",
+    "mongoose": "^9.3.2",
+    "next": "16.2.1",
+    "nodemailer": "^8.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
